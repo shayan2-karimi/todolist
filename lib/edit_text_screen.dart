@@ -5,7 +5,7 @@ import 'package:todolist/data.dart';
 import 'package:todolist/main.dart';
 
 class EditTextScreen extends StatefulWidget {
-  EditTextScreen({super.key, required this.tastDataEdit});
+  const EditTextScreen({super.key, required this.tastDataEdit});
   final Task tastDataEdit;
 
   @override
@@ -20,11 +20,13 @@ class _EditTextScreenState extends State<EditTextScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
         backgroundColor: Colors.white,
+        foregroundColor: themeDataC.colorScheme.onSurface,
         title: const Text('text edit'),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
-        elevation: 0,
         onPressed: () {
           widget.tastDataEdit.name = textEditingController.text;
           widget.tastDataEdit.priority = widget.tastDataEdit.priority;
@@ -36,7 +38,18 @@ class _EditTextScreenState extends State<EditTextScreen> {
           }
           Navigator.of(context).pop();
         },
-        label: const Text('save changes'),
+        label: Row(
+          children: [
+            Text('save changes'),
+            SizedBox(
+              width: 8,
+            ),
+            Icon(
+              CupertinoIcons.check_mark,
+              size: 20,
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(15),
@@ -49,7 +62,7 @@ class _EditTextScreenState extends State<EditTextScreen> {
                   flex: 1,
                   child: BoxEdit(
                     labeC: 'High',
-                    colorC: Colors.orange,
+                    colorC: highPriority,
                     isSelected: widget.tastDataEdit.priority == Priority.high,
                     onTap: () {
                       setState(() {
@@ -65,7 +78,7 @@ class _EditTextScreenState extends State<EditTextScreen> {
                   flex: 1,
                   child: BoxEdit(
                     labeC: 'Normal',
-                    colorC: Colors.blueAccent,
+                    colorC: normalPriority,
                     isSelected: widget.tastDataEdit.priority == Priority.normal,
                     onTap: () {
                       setState(() {
@@ -81,7 +94,7 @@ class _EditTextScreenState extends State<EditTextScreen> {
                   flex: 1,
                   child: BoxEdit(
                     labeC: 'low',
-                    colorC: Colors.green,
+                    colorC: lowPriority,
                     isSelected: widget.tastDataEdit.priority == Priority.low,
                     onTap: () {
                       setState(() {
