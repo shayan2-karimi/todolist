@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:todolist/data.dart';
+import 'package:todolist/constant.dart';
+import 'package:todolist/data/data.dart';
 import 'package:todolist/main.dart';
 
 class EditTextScreen extends StatefulWidget {
@@ -18,6 +19,7 @@ class _EditTextScreenState extends State<EditTextScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeDataC = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -38,7 +40,7 @@ class _EditTextScreenState extends State<EditTextScreen> {
           }
           Navigator.of(context).pop();
         },
-        label: Row(
+        label: const Row(
           children: [
             Text('save changes'),
             SizedBox(
@@ -62,7 +64,7 @@ class _EditTextScreenState extends State<EditTextScreen> {
                   flex: 1,
                   child: BoxEdit(
                     labeC: 'High',
-                    colorC: highPriority,
+                    colorC: MyColor.highPriority,
                     isSelected: widget.tastDataEdit.priority == Priority.high,
                     onTap: () {
                       setState(() {
@@ -78,7 +80,7 @@ class _EditTextScreenState extends State<EditTextScreen> {
                   flex: 1,
                   child: BoxEdit(
                     labeC: 'Normal',
-                    colorC: normalPriority,
+                    colorC: MyColor.normalPriority,
                     isSelected: widget.tastDataEdit.priority == Priority.normal,
                     onTap: () {
                       setState(() {
@@ -94,7 +96,7 @@ class _EditTextScreenState extends State<EditTextScreen> {
                   flex: 1,
                   child: BoxEdit(
                     labeC: 'low',
-                    colorC: lowPriority,
+                    colorC: MyColor.lowPriority,
                     isSelected: widget.tastDataEdit.priority == Priority.low,
                     onTap: () {
                       setState(() {
