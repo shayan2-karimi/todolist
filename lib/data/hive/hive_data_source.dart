@@ -38,6 +38,12 @@ class HiveDataSource implements DataSource<Task> {
 
   @override
   Future<List<Task>> getAll({String searchKeybord = ''}) async {
-    return box.values.toList();
+    if (searchKeybord.isNotEmpty) {
+      return box.values
+          .where((value) => value.name.contains(searchKeybord))
+          .toList();
+    } else {
+      return box.values.toList();
+    }
   }
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 import 'package:todolist/constant.dart';
 import 'package:todolist/data/data.dart';
-import 'package:todolist/main.dart';
+import 'package:todolist/data/repasitory/repasitory.dart';
 
 class EditTextScreen extends StatefulWidget {
   const EditTextScreen({super.key, required this.tastDataEdit});
@@ -32,12 +32,9 @@ class _EditTextScreenState extends State<EditTextScreen> {
         onPressed: () {
           widget.tastDataEdit.name = textEditingController.text;
           widget.tastDataEdit.priority = widget.tastDataEdit.priority;
-          if (widget.tastDataEdit.isInBox) {
-            widget.tastDataEdit.save();
-          } else {
-            final box = Hive.box<Task>(taskNameBox);
-            box.add(widget.tastDataEdit);
-          }
+          final repasitory =
+              Provider.of<Repasitory<Task>>(context, listen: false);
+          repasitory.createOrUpdate(widget.tastDataEdit);
           Navigator.of(context).pop();
         },
         label: const Row(

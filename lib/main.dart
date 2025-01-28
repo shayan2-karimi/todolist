@@ -1,13 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:todolist/constant.dart';
 import 'package:todolist/data/data.dart';
-import 'package:todolist/screen/edit_text_screen.dart';
-import 'package:todolist/screen/home.dart';
+import 'package:todolist/data/hive/hive_data_source.dart';
+import 'package:todolist/data/repasitory/repasitory.dart';
+import 'package:todolist/screen/home_screen.dart';
 
 const taskNameBox = 'task';
 void main() async {
@@ -22,12 +22,22 @@ void main() async {
   Hive.registerAdapter(PriorityAdapter());
 
   await Hive.openBox<Task>(taskNameBox);
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) {
+        return Repasitory(
+          HiveDataSource(
+            Hive.box(taskNameBox),
+          ),
+        );
+      },
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

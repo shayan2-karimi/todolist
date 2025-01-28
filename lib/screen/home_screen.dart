@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:todolist/constant.dart';
 import 'package:todolist/data/data.dart';
+import 'package:todolist/data/repasitory/repasitory.dart';
 import 'package:todolist/screen/edit_text_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -106,80 +108,25 @@ class HomeScreen extends StatelessWidget {
                 child: ValueListenableBuilder(
                   valueListenable: valueNotifier,
                   builder: (context, value, child) {
-                    return ValueListenableBuilder(
-                      valueListenable: box.listenable(),
-                      builder: (context, box, child) {
-                        final List<Task> items;
-                        if (textEditingController.text.isEmpty) {
-                          items = box.values.toList();
-                        } else {
-                          items = box.values.where((value) {
-                            return value.name
-                                .contains(textEditingController.text);
-                          }).toList();
-                        }
-                        if (box.isNotEmpty) {
-                          return ListView.builder(
-                            itemCount: items.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index == 0) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        children: [
-                                          Text(
-                                            'today',
-                                            style: TextStyle(
-                                              fontSize: 21,
-                                              fontWeight: FontWeight.bold,
-                                              color: themeDataC
-                                                  .colorScheme.onSurface,
-                                            ),
-                                          ),
-                                          Container(
-                                            width: 70,
-                                            height: 3,
-                                            decoration: BoxDecoration(
-                                              color: themeDataC
-                                                  .colorScheme.primary,
-                                              borderRadius:
-                                                  BorderRadius.circular(2),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      MaterialButton(
-                                        elevation: 0,
-                                        color: const Color(0xffEAEFF5),
-                                        onPressed: () {
-                                          box.clear();
-                                        },
-                                        child: Text(
-                                          'Delete All',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: themeDataC
-                                                .colorScheme.onSecondary,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                    return Consumer<Repasitory<Task>>(
+                      builder: (context, repasitory, child) {
+                        return FutureBuilder<List<Task>>(
+                          future: repasitory.getAll(
+                              searchKeybord: textEditingController.text),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              if (snapshot.data!.isNotEmpty) {
+                                return TaskList(
+                                    items: snapshot.data!,
+                                    themeDataC: themeDataC);
                               } else {
-                                final Task taskData = items[index - 1];
-                                return TastData(taskData: taskData);
+                                return const EmptyState();
                               }
-                            },
-                          );
-                        } else {
-                          return const EmptyState();
-                        }
+                            } else {
+                              return const CircularProgressIndicator();
+                            }
+                          },
+                        );
                       },
                     );
                   },
@@ -189,6 +136,76 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class TaskList extends StatelessWidget {
+  const TaskList({
+    super.key,
+    required this.items,
+    required this.themeDataC,
+  });
+
+  final List<Task> items;
+  final ThemeData themeDataC;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: items.length + 1,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      'today',
+                      style: TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.bold,
+                        color: themeDataC.colorScheme.onSurface,
+                      ),
+                    ),
+                    Container(
+                      width: 70,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: themeDataC.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ],
+                ),
+                MaterialButton(
+                  elevation: 0,
+                  color: const Color(0xffEAEFF5),
+                  onPressed: () {
+                    final repasitory2 =
+                        Provider.of<Repasitory<Task>>(context, listen: false);
+                    repasitory2.deleteAll();
+                  },
+                  child: Text(
+                    'Delete All',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: themeDataC.colorScheme.onSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          final Task taskData = items[index - 1];
+          return TastData(taskData: taskData);
+        }
+      },
     );
   }
 }
