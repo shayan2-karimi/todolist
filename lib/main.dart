@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +8,8 @@ import 'package:todolist/constant.dart';
 import 'package:todolist/data/data.dart';
 import 'package:todolist/data/hive/hive_data_source.dart';
 import 'package:todolist/data/repasitory/repasitory.dart';
-import 'package:todolist/screen/home_screen.dart';
+import 'package:todolist/screen/home/bloc/task_list_bloc.dart';
+import 'package:todolist/screen/home/home_screen.dart';
 
 const taskNameBox = 'task';
 void main() async {
@@ -23,14 +25,19 @@ void main() async {
 
   await Hive.openBox<Task>(taskNameBox);
   runApp(
-    ChangeNotifierProvider(
-      create: (context) {
-        return Repasitory(
-          HiveDataSource(
-            Hive.box(taskNameBox),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => Repasitory(
+            HiveDataSource(
+              Hive.box(taskNameBox),
+            ),
           ),
-        );
-      },
+        ),
+        BlocProvider(
+          create: (context) => TaskListBloc(context.read<Repasitory<Task>>()),
+        ),
+      ],
       child: const MyApp(),
     ),
   );
@@ -59,7 +66,7 @@ class MyApp extends StatelessWidget {
         colorScheme: const ColorScheme.light(
           primary: MyColor.primaryColor,
           onPrimary: Colors.white,
-          surface: Color(0xffF3F5F8),
+          surface: Colors.white,
           onSurface: Colors.black,
           secondary: MyColor.primaryColor,
           onSecondary: Colors.white,

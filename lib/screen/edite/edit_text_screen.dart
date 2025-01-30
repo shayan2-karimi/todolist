@@ -1,21 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todolist/constant.dart';
 import 'package:todolist/data/data.dart';
-import 'package:todolist/data/repasitory/repasitory.dart';
+import 'package:todolist/screen/edite/cubit/edite_screen_cubit_cubit.dart';
 
 class EditTextScreen extends StatefulWidget {
-  const EditTextScreen({super.key, required this.tastDataEdit});
-  final Task tastDataEdit;
+  const EditTextScreen({
+    super.key,
+  });
 
   @override
   State<EditTextScreen> createState() => _EditTextScreenState();
 }
 
 class _EditTextScreenState extends State<EditTextScreen> {
-  late TextEditingController textEditingController =
-      TextEditingController(text: widget.tastDataEdit.name);
+  late TextEditingController textEditingController;
+
+  @override
+  void initState() {
+    textEditingController = TextEditingController(
+        text: context.read<EditeScreenCubitCubit>().state.repasitory.name);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +37,7 @@ class _EditTextScreenState extends State<EditTextScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          widget.tastDataEdit.name = textEditingController.text;
-          widget.tastDataEdit.priority = widget.tastDataEdit.priority;
-          final repasitory =
-              Provider.of<Repasitory<Task>>(context, listen: false);
-          repasitory.createOrUpdate(widget.tastDataEdit);
+          context.read<EditeScreenCubitCubit>().onChangedClickButton();
           Navigator.of(context).pop();
         },
         label: const Row(
@@ -54,58 +57,66 @@ class _EditTextScreenState extends State<EditTextScreen> {
         padding: const EdgeInsets.all(15),
         child: Column(
           children: [
-            Flex(
-              direction: Axis.horizontal,
-              children: [
-                Flexible(
-                  flex: 1,
-                  child: BoxEdit(
-                    labeC: 'High',
-                    colorC: MyColor.highPriority,
-                    isSelected: widget.tastDataEdit.priority == Priority.high,
-                    onTap: () {
-                      setState(() {
-                        widget.tastDataEdit.priority = Priority.high;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(
-                  width: 8,
-                ),
-                Flexible(
-                  flex: 1,
-                  child: BoxEdit(
-                    labeC: 'Normal',
-                    colorC: MyColor.normalPriority,
-                    isSelected: widget.tastDataEdit.priority == Priority.normal,
-                    onTap: () {
-                      setState(() {
-                        widget.tastDataEdit.priority = Priority.normal;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(
-                  width: 8,
-                ),
-                Flexible(
-                  flex: 1,
-                  child: BoxEdit(
-                    labeC: 'low',
-                    colorC: MyColor.lowPriority,
-                    isSelected: widget.tastDataEdit.priority == Priority.low,
-                    onTap: () {
-                      setState(() {
-                        widget.tastDataEdit.priority = Priority.low;
-                      });
-                    },
-                  ),
-                ),
-              ],
+            BlocBuilder<EditeScreenCubitCubit, EditeScreenCubitState>(
+              builder: (context, state) {
+                final priority = state.repasitory.priority;
+                return Flex(
+                  direction: Axis.horizontal,
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: BoxEdit(
+                        labeC: 'High',
+                        colorC: MyColor.highPriority,
+                        isSelected: priority == Priority.high,
+                        onTap: () {
+                          context
+                              .read<EditeScreenCubitCubit>()
+                              .onChangedPriority(Priority.high);
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Flexible(
+                      flex: 1,
+                      child: BoxEdit(
+                        labeC: 'Normal',
+                        colorC: MyColor.normalPriority,
+                        isSelected: priority == Priority.normal,
+                        onTap: () {
+                          context
+                              .read<EditeScreenCubitCubit>()
+                              .onChangedPriority(Priority.normal);
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Flexible(
+                      flex: 1,
+                      child: BoxEdit(
+                        labeC: 'low',
+                        colorC: MyColor.lowPriority,
+                        isSelected: priority == Priority.low,
+                        onTap: () {
+                          context
+                              .read<EditeScreenCubitCubit>()
+                              .onChangedPriority(Priority.low);
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
             TextField(
               controller: textEditingController,
+              onChanged: (value) {
+                context.read<EditeScreenCubitCubit>().onChangedText(value);
+              },
               decoration: const InputDecoration(
                 label: Text('Add a task for today...'),
               ),
@@ -137,9 +148,14 @@ class BoxEdit extends StatelessWidget {
       child: Container(
         height: 50,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: Colors.white,
-        ),
+            borderRadius: BorderRadius.circular(15),
+            color: Colors.white,
+            boxShadow: const [
+              BoxShadow(
+                color: MyColor.primaryVariantColor,
+                blurRadius: 2,
+              )
+            ]),
         child: Stack(
           children: [
             Center(
